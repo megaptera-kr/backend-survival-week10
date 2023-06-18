@@ -1,6 +1,12 @@
 package kr.megaptera.backendsurvivalweek10.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,6 +25,8 @@ public class Cart {
     @JoinColumn(name = "cart_id")
     @OrderBy("id")
     private List<LineItem> lineItems = new ArrayList<>();
+
+    // User 추가 필요
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -81,13 +89,13 @@ public class Cart {
 
     public Optional<LineItem> findLineItem(ProductId productId) {
         return lineItems.stream()
-            .filter(item -> item.sameProduct(productId))
-            .findFirst();
+                .filter(item -> item.sameProduct(productId))
+                .findFirst();
     }
 
     public Optional<LineItem> findLineItem(LineItemId lineItemId) {
         return lineItems.stream()
-            .filter(item -> item.id().equals(lineItemId))
-            .findFirst();
+                .filter(item -> item.id().equals(lineItemId))
+                .findFirst();
     }
 }

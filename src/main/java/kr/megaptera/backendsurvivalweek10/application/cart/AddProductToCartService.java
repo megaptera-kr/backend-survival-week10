@@ -25,8 +25,8 @@ public class AddProductToCartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow();
 
-        Cart cart = cartRepository.findById(CartId.DEFAULT)
-                .orElse(new Cart(CartId.DEFAULT));
+        Cart cart = cartRepository.findById(CartId.generate())
+                .orElse(new Cart(CartId.generate()));
 
         cart.addProduct(product, quantity);
 
