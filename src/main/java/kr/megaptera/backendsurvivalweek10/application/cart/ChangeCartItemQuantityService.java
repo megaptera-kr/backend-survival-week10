@@ -17,7 +17,7 @@ public class ChangeCartItemQuantityService {
     }
 
     public void changeQuantity(LineItemId lineItemId, int quantity) {
-        Cart cart = cartRepository.findById(CartId.DEFAULT).get();
+        Cart cart = cartRepository.findById(new CartId("")).get();
 
         cart.changeLineItemQuantity(lineItemId, quantity);
     }

@@ -16,6 +16,6 @@ public class GetCartService {
     }
 
     public CartDto getCartDto() {
-        return cartDtoFetcher.fetchCartDto(CartId.DEFAULT);
+        return cartDtoFetcher.fetchCartDto(new CartId(""));
     }
 }
