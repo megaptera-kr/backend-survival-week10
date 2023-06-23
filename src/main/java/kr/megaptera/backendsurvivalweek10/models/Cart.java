@@ -1,6 +1,15 @@
 package kr.megaptera.backendsurvivalweek10.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -14,6 +23,10 @@ import java.util.Optional;
 public class Cart {
     @EmbeddedId
     private CartId cartId;
+
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "user_id"))
+    private UserId userId;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cart_id")
@@ -31,6 +44,11 @@ public class Cart {
 
     public Cart(CartId cartId) {
         this.cartId = cartId;
+    }
+
+    public Cart(CartId cartId, UserId userId) {
+        this.cartId = cartId;
+        this.userId = userId;
     }
 
     public Cart(CartId cartId, List<LineItem> lineItems) {
@@ -81,13 +99,13 @@ public class Cart {
 
     public Optional<LineItem> findLineItem(ProductId productId) {
         return lineItems.stream()
-            .filter(item -> item.sameProduct(productId))
-            .findFirst();
+                .filter(item -> item.sameProduct(productId))
+                .findFirst();
     }
 
     public Optional<LineItem> findLineItem(LineItemId lineItemId) {
         return lineItems.stream()
-            .filter(item -> item.id().equals(lineItemId))
-            .findFirst();
+                .filter(item -> item.id().equals(lineItemId))
+                .findFirst();
     }
 }

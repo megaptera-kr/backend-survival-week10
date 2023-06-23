@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ProductController.class)
 @ActiveProfiles("test")
-class ProductControllerTest {
+class ProductControllerTest extends ControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,38 +35,60 @@ class ProductControllerTest {
     private CreateProductService createProductService;
 
     @Test
-    @DisplayName("GET /products")
+    @DisplayName("GET /products with the valid access token")
     void list() throws Exception {
         ProductListDto.ProductDto productDto =
-            new ProductListDto.ProductDto("test-id", "제품", 100_000L);
+                new ProductListDto.ProductDto("test-id", "제품", 100_000L);
 
         given(getProductListService.getProductListDto()).willReturn(
-            new ProductListDto(List.of(productDto)));
+                new ProductListDto(List.of(productDto)));
 
-        mockMvc.perform(get("/products"))
-            .andExpect(status().isOk())
-            .andExpect(contentContains("제품"));
+        mockMvc.perform(get("/products")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(contentContains("제품"));
     }
 
     @Test
-    @DisplayName("POST /products")
-    void create() throws Exception {
+    @DisplayName("POST /products with ROLE_ADMIN")
+    void createWithAdminRole() throws Exception {
         String json = String.format(
-            """
-                {
-                    "name": "멋진 제품",
-                    "price": %d
-                }
-                """,
-            100_000L
+                """
+                        {
+                            "name": "멋진 제품",
+                            "price": %d
+                        }
+                        """,
+                100_000L
         );
 
         mockMvc.perform(post("/products")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .header("Authorization", "Bearer " + adminAccessToken))
+                .andExpect(status().isCreated());
 
         verify(createProductService)
-            .createProduct("멋진 제품", new Money(100_000L));
+                .createProduct("멋진 제품", new Money(100_000L));
+    }
+
+    @Test
+    @DisplayName("POST /products with ROLE_USER")
+    void createWithUserRole() throws Exception {
+        String json = String.format(
+                """
+                        {
+                            "name": "멋진 제품",
+                            "price": %d
+                        }
+                        """,
+                100_000L
+        );
+
+        mockMvc.perform(post("/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isForbidden());
     }
 }

@@ -40,11 +40,11 @@ class AddProductToCartServiceTest {
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.empty());
+        given(cartRepository.findByUserId(any())).willReturn(Optional.empty());
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        Cart cart = addProductToCartService.addProduct(productId, 1);
+        Cart cart = addProductToCartService.addProduct(productId, 1, "UserID");
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
 
@@ -59,11 +59,11 @@ class AddProductToCartServiceTest {
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        addProductToCartService.addProduct(productId, 1);
+        addProductToCartService.addProduct(productId, 1, "UserID");
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
     }
@@ -77,7 +77,7 @@ class AddProductToCartServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> {
-            addProductToCartService.addProduct(productId, 1);
+            addProductToCartService.addProduct(productId, 1, "UserID");
         });
     }
 }

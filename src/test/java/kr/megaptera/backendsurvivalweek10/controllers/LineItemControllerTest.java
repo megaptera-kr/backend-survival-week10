@@ -21,12 +21,14 @@ import java.util.NoSuchElementException;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LineItemController.class)
 @ActiveProfiles("test")
-class LineItemControllerTest {
+class LineItemControllerTest extends ControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,10 +44,11 @@ class LineItemControllerTest {
     @Test
     @DisplayName("GET /cart-line-items")
     void list() throws Exception {
-        given(getCartService.getCartDto()).willReturn(new CartDto(List.of()));
+        given(getCartService.getCartDto("UserID")).willReturn(new CartDto(List.of()));
 
-        mockMvc.perform(get("/cart-line-items"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/cart-line-items")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -54,21 +57,22 @@ class LineItemControllerTest {
         ProductId productId = new ProductId("test-id");
 
         String json = String.format(
-            """
-                {
-                    "productId": "%s",
-                    "quantity": 3
-                }
-                """,
-            productId
+                """
+                        {
+                            "productId": "%s",
+                            "quantity": 3
+                        }
+                        """,
+                productId
         );
 
         mockMvc.perform(post("/cart-line-items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isCreated());
 
-        verify(addProductToCartService).addProduct(productId, 3);
+        verify(addProductToCartService).addProduct(productId, 3, "UserID");
     }
 
     @Test
@@ -79,11 +83,12 @@ class LineItemControllerTest {
         String json = "{\"quantity\": 3}";
 
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNoContent());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isNoContent());
 
-        verify(changeCartItemQuantityService).changeQuantity(lineItemId, 3);
+        verify(changeCartItemQuantityService).changeQuantity(lineItemId, 3, "UserID");
     }
 
     @Test
@@ -94,12 +99,13 @@ class LineItemControllerTest {
         String json = "{\"quantity\": 3}";
 
         doThrow(new NoSuchElementException())
-            .when(changeCartItemQuantityService)
-            .changeQuantity(lineItemId, 3);
+                .when(changeCartItemQuantityService)
+                .changeQuantity(lineItemId, 3, "UserID");
 
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNotFound());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isNotFound());
     }
 }
