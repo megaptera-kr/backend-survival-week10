@@ -26,7 +26,6 @@ class ChangeCartItemQuantityServiceTest {
     @BeforeEach
     void setUp() {
         cartRepository = mock(CartRepository.class);
-
         changeCartItemQuantityService =
                 new ChangeCartItemQuantityService(cartRepository);
     }
@@ -41,7 +40,7 @@ class ChangeCartItemQuantityServiceTest {
 
         given(cartRepository.findById(any())).willReturn(Optional.of(cart));
 
-        changeCartItemQuantityService.changeQuantity(lineItemId, 10);
+        changeCartItemQuantityService.changeQuantity(lineItemId, 10, "UserID");
 
         assertThat(lineItem.quantity()).isEqualTo(10);
     }
@@ -56,7 +55,7 @@ class ChangeCartItemQuantityServiceTest {
         given(cartRepository.findById(any())).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> {
-            changeCartItemQuantityService.changeQuantity(lineItemId, 10);
+            changeCartItemQuantityService.changeQuantity(lineItemId, 10, "UserID");
         });
     }
 }

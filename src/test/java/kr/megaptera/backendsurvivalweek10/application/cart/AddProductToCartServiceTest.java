@@ -44,7 +44,7 @@ class AddProductToCartServiceTest {
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        Cart cart = addProductToCartService.addProduct(productId, 1);
+        Cart cart = addProductToCartService.addProduct(productId, 1, "UserID");
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
 
@@ -63,7 +63,7 @@ class AddProductToCartServiceTest {
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        addProductToCartService.addProduct(productId, 1);
+        addProductToCartService.addProduct(productId, 1, "UserID");
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
     }
@@ -77,7 +77,7 @@ class AddProductToCartServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> {
-            addProductToCartService.addProduct(productId, 1);
+            addProductToCartService.addProduct(productId, 1, "UserID");
         });
     }
 }
