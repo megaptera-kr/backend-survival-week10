@@ -1,6 +1,9 @@
 package kr.megaptera.backendsurvivalweek10.models;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -21,12 +24,14 @@ public class Cart {
     @EmbeddedId
     private CartId cartId;
 
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "user_id"))
+    private UserId userId;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cart_id")
     @OrderBy("id")
     private List<LineItem> lineItems = new ArrayList<>();
-
-    // User 추가 필요
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -39,6 +44,11 @@ public class Cart {
 
     public Cart(CartId cartId) {
         this.cartId = cartId;
+    }
+
+    public Cart(CartId cartId, UserId userId) {
+        this.cartId = cartId;
+        this.userId = userId;
     }
 
     public Cart(CartId cartId, List<LineItem> lineItems) {
