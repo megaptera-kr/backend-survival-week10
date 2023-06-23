@@ -40,7 +40,7 @@ class AddProductToCartServiceTest {
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.empty());
+        given(cartRepository.findByUserId(any())).willReturn(Optional.empty());
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
@@ -59,7 +59,7 @@ class AddProductToCartServiceTest {
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 

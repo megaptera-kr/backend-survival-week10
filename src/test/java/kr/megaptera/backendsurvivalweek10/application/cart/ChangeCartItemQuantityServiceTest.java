@@ -38,7 +38,7 @@ class ChangeCartItemQuantityServiceTest {
         LineItem lineItem = cart.lineItem(0);
         LineItemId lineItemId = lineItem.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
 
         changeCartItemQuantityService.changeQuantity(lineItemId, 10, "UserID");
 
@@ -52,7 +52,7 @@ class ChangeCartItemQuantityServiceTest {
 
         LineItemId lineItemId = new LineItemId("test-id");
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> {
             changeCartItemQuantityService.changeQuantity(lineItemId, 10, "UserID");
