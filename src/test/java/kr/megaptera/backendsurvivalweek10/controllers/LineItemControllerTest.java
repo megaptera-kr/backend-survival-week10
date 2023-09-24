@@ -3,7 +3,7 @@ package kr.megaptera.backendsurvivalweek10.controllers;
 import kr.megaptera.backendsurvivalweek10.application.cart.AddProductToCartService;
 import kr.megaptera.backendsurvivalweek10.application.cart.ChangeCartItemQuantityService;
 import kr.megaptera.backendsurvivalweek10.application.cart.GetCartService;
-import kr.megaptera.backendsurvivalweek10.dtos.CartDto;
+import kr.megaptera.backendsurvivalweek10.dtos.cart.CartDto;
 import kr.megaptera.backendsurvivalweek10.models.LineItemId;
 import kr.megaptera.backendsurvivalweek10.models.ProductId;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LineItemController.class)
-@ActiveProfiles("test")
-class LineItemControllerTest {
+class LineItemControllerTest extends ControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,10 +41,11 @@ class LineItemControllerTest {
     @Test
     @DisplayName("GET /cart-line-items")
     void list() throws Exception {
-        given(getCartService.getCartDto()).willReturn(new CartDto(List.of()));
+        given(getCartService.getCartDto(USER_ID)).willReturn(new CartDto(List.of()));
 
-        mockMvc.perform(get("/cart-line-items"))
-            .andExpect(status().isOk());
+        mockMvc.perform(get("/cart-line-items")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -54,21 +54,22 @@ class LineItemControllerTest {
         ProductId productId = new ProductId("test-id");
 
         String json = String.format(
-            """
-                {
-                    "productId": "%s",
-                    "quantity": 3
-                }
-                """,
-            productId
+                """
+                    {
+                        "productId": "%s",
+                        "quantity": 3
+                    }
+                    """,
+                productId
         );
 
         mockMvc.perform(post("/cart-line-items")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
 
-        verify(addProductToCartService).addProduct(productId, 3);
+        verify(addProductToCartService).addProduct(USER_ID, productId, 3);
     }
 
     @Test
@@ -79,11 +80,12 @@ class LineItemControllerTest {
         String json = "{\"quantity\": 3}";
 
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNoContent());
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNoContent());
 
-        verify(changeCartItemQuantityService).changeQuantity(lineItemId, 3);
+        verify(changeCartItemQuantityService).changeQuantity(USER_ID, lineItemId, 3);
     }
 
     @Test
@@ -94,12 +96,13 @@ class LineItemControllerTest {
         String json = "{\"quantity\": 3}";
 
         doThrow(new NoSuchElementException())
-            .when(changeCartItemQuantityService)
-            .changeQuantity(lineItemId, 3);
+                .when(changeCartItemQuantityService)
+                .changeQuantity(USER_ID, lineItemId, 3);
 
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNotFound());
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNotFound());
     }
 }

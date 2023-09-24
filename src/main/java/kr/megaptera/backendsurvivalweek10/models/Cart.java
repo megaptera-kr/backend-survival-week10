@@ -15,6 +15,10 @@ public class Cart {
     @EmbeddedId
     private CartId cartId;
 
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "user_id"))
+    private UserId userId;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cart_id")
     @OrderBy("id")
@@ -32,6 +36,12 @@ public class Cart {
     public Cart(CartId cartId) {
         this.cartId = cartId;
     }
+
+    public Cart(CartId cartId, UserId userId) {
+        this.cartId = cartId;
+        this.userId = userId;
+    }
+
 
     public Cart(CartId cartId, List<LineItem> lineItems) {
         this.cartId = cartId;

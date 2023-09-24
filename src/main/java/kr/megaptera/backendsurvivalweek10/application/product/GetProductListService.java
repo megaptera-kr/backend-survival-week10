@@ -1,6 +1,6 @@
 package kr.megaptera.backendsurvivalweek10.application.product;
 
-import kr.megaptera.backendsurvivalweek10.dtos.ProductListDto;
+import kr.megaptera.backendsurvivalweek10.dtos.product.ProductListDto;
 import kr.megaptera.backendsurvivalweek10.infrastructure.ProductDtoFetcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

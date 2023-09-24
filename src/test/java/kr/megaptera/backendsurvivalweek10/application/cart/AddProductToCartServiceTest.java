@@ -37,14 +37,15 @@ class AddProductToCartServiceTest {
     @Test
     @DisplayName("addProduct - when cart doesn't exist")
     void cartNotExists() {
+        String userId = "USER_ID";
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.empty());
+        given(cartRepository.findByUserId(any())).willReturn(Optional.empty());
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        Cart cart = addProductToCartService.addProduct(productId, 1);
+        Cart cart = addProductToCartService.addProduct(userId, productId, 1);
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
 
@@ -54,16 +55,17 @@ class AddProductToCartServiceTest {
     @Test
     @DisplayName("addProduct - when cart exists")
     void cartExists() {
+        String userId = "USER_ID";
         Cart cart = Fixtures.cart();
 
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        addProductToCartService.addProduct(productId, 1);
+        addProductToCartService.addProduct(userId, productId, 1);
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
     }
@@ -71,13 +73,14 @@ class AddProductToCartServiceTest {
     @Test
     @DisplayName("addProduct - when product doesn't exist")
     void productNotExists() {
+        String userId = "USER_ID";
         ProductId productId = new ProductId("test-product-id");
 
         given(productRepository.findById(productId))
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> {
-            addProductToCartService.addProduct(productId, 1);
+            addProductToCartService.addProduct(userId, productId, 1);
         });
     }
 }

@@ -1,6 +1,6 @@
 package kr.megaptera.backendsurvivalweek10.infrastructure;
 
-import kr.megaptera.backendsurvivalweek10.dtos.ProductListDto;
+import kr.megaptera.backendsurvivalweek10.dtos.product.ProductListDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
