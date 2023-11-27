@@ -2,7 +2,7 @@ package kr.megaptera.backendsurvivalweek10.controllers;
 
 import kr.megaptera.backendsurvivalweek10.application.product.CreateProductService;
 import kr.megaptera.backendsurvivalweek10.application.product.GetProductListService;
-import kr.megaptera.backendsurvivalweek10.dtos.ProductListDto;
+import kr.megaptera.backendsurvivalweek10.dtos.product.ProductListDto;
 import kr.megaptera.backendsurvivalweek10.models.Money;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,8 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductController.class)
-@ActiveProfiles("test")
-class ProductControllerTest {
+class ProductControllerTest extends ControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -38,35 +37,57 @@ class ProductControllerTest {
     @DisplayName("GET /products")
     void list() throws Exception {
         ProductListDto.ProductDto productDto =
-            new ProductListDto.ProductDto("test-id", "제품", 100_000L);
+                new ProductListDto.ProductDto("test-id", "제품", 100_000L);
 
         given(getProductListService.getProductListDto()).willReturn(
-            new ProductListDto(List.of(productDto)));
+                new ProductListDto(List.of(productDto)));
 
-        mockMvc.perform(get("/products"))
-            .andExpect(status().isOk())
-            .andExpect(contentContains("제품"));
+        mockMvc.perform(get("/products")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk())
+                .andExpect(contentContains("제품"));
     }
 
     @Test
-    @DisplayName("POST /products")
-    void create() throws Exception {
+    @DisplayName("POST /products - when the current user is ROLE_ADMIN")
+    void createWithRoleAdmin() throws Exception {
         String json = String.format(
-            """
-                {
-                    "name": "멋진 제품",
-                    "price": %d
-                }
-                """,
-            100_000L
+                """
+                    {
+                        "name": "멋진 제품",
+                        "price": %d
+                    }
+                    """,
+                100_000L
         );
 
         mockMvc.perform(post("/products")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+                        .header("Authorization", "Bearer " + adminAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
 
         verify(createProductService)
-            .createProduct("멋진 제품", new Money(100_000L));
+                .createProduct("멋진 제품", new Money(100_000L));
+    }
+
+    @Test
+    @DisplayName("POST /products - when the current user is ROLE_USER")
+    void createWithRoleUSER() throws Exception {
+        String json = String.format(
+                """
+                    {
+                        "name": "멋진 제품",
+                        "price": %d
+                    }
+                    """,
+                100_000L
+        );
+
+        mockMvc.perform(post("/products")
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
     }
 }

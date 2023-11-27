@@ -1,4 +1,4 @@
-package kr.megaptera.backendsurvivalweek10.dtos;
+package kr.megaptera.backendsurvivalweek10.dtos.cart;
 
 import java.util.List;
 
