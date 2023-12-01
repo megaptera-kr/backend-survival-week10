@@ -1,39 +1,84 @@
 package kr.megaptera.backendsurvivalweek10.controllers;
 
+import kr.megaptera.backendsurvivalweek10.application.user.SignupService;
+import kr.megaptera.backendsurvivalweek10.security.AccessTokenService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+class UserControllerTest extends ControllerTest{
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    @DisplayName("GET / - with correct Access Token")
-    void homeWithAccessToken() throws Exception {
-        mockMvc.perform(get("/")
-                        .header("Authorization", "Bearer TOKEN"))
-                .andExpect(status().isOk());
+    @SpyBean
+    private SignupService signupService;
+
+    @SpyBean
+    private PasswordEncoder passwordEncoder;
+    @BeforeEach
+    void setUp() {
+        given(userDetailsDao.existsByUsername("tester")).willReturn(true);
     }
 
     @Test
-    @DisplayName("GET / - with incorrect Access Token")
-    void homeWithIncorrectAccessToken() throws Exception {
-        mockMvc.perform(get("/")
-                        .header("Authorization", "Bearer XXX"))
-                .andExpect(status().isForbidden());
+    @DisplayName("POST /users - with valid attributes")
+    void signupSuccess() throws Exception {
+        String json = """
+            {
+                "username": "newbie",
+                "password": "password"
+            }
+            """;
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    @DisplayName("GET / - without Access Token")
-    void homeWithoutAccessToken() throws Exception {
-        mockMvc.perform(get("/"))
-                .andExpect(status().isForbidden());
+    @DisplayName("POST /users - with invalid attributes")
+    void signupWithInvalidAttributes() throws Exception {
+        String json = """
+            {
+                "username": "",
+                "password": ""
+            }
+            """;
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /users - when username already exists")
+    void signupDuplicated() throws Exception {
+        String json = """
+            {
+                "username": "tester",
+                "password": "password"
+            }
+            """;
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
     }
 }

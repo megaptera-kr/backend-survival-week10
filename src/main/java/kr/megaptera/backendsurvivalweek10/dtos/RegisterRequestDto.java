@@ -1,4 +1,6 @@
 package kr.megaptera.backendsurvivalweek10.dtos;
 
-public record RegisterRequestDto(String username, String password){
+import jakarta.validation.constraints.NotBlank;
+
+public record RegisterRequestDto(@NotBlank String username, @NotBlank String password){
 }
