@@ -6,6 +6,7 @@ import kr.megaptera.backendsurvivalweek10.dtos.CreateProductDto;
 import kr.megaptera.backendsurvivalweek10.dtos.ProductListDto;
 import kr.megaptera.backendsurvivalweek10.models.Money;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,6 +28,7 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Secured("ROLE_ADMIN")
     public void create(@RequestBody CreateProductDto dto) {
         String name = dto.name().strip();
         Money price = new Money(dto.price());

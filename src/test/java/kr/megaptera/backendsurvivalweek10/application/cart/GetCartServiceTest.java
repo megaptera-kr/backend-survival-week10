@@ -22,7 +22,9 @@ class GetCartServiceTest {
 
     @Test
     void getCartDto() {
-        getCartService.getCartDto();
+        String userId = "USER_ID";
+
+        getCartService.getCartDto(userId);
 
         verify(cartDtoFetcher).fetchCartDto(any());
     }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.util.List;
 
+
 @Component
 public class ProductDtoFetcher {
     private final JdbcTemplate jdbcTemplate;
@@ -17,19 +18,19 @@ public class ProductDtoFetcher {
 
     public ProductListDto fetchProductListDto() {
         String sql = """
-            SELECT *
-            FROM products
-            ORDER BY products.id DESC
-            """;
+                SELECT *
+                FROM products
+                ORDER BY products.id DESC
+                """;
 
         List<ProductListDto.ProductDto> productDtos = jdbcTemplate.query(
-            sql,
-            (ResultSet resultSet, int rowNum) ->
-                new ProductListDto.ProductDto(
-                    resultSet.getString("id"),
-                    resultSet.getString("name"),
-                    resultSet.getLong("price")
-                )
+                sql,
+                (ResultSet resultSet, int rowNum) ->
+                        new ProductListDto.ProductDto(
+                                resultSet.getString("id"),
+                                resultSet.getString("name"),
+                                resultSet.getLong("price")
+                        )
         );
 
         return new ProductListDto(productDtos);

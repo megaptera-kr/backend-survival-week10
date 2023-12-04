@@ -34,14 +34,15 @@ class ChangeCartItemQuantityServiceTest {
     @Test
     @DisplayName("changeQuantity - when line item exists")
     void changeQuantity() {
+        String userId = "USER_ID";
         Cart cart = Fixtures.cart(List.of(Fixtures.product()));
 
         LineItem lineItem = cart.lineItem(0);
         LineItemId lineItemId = lineItem.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
 
-        changeCartItemQuantityService.changeQuantity(lineItemId, 10);
+        changeCartItemQuantityService.changeQuantity(userId, lineItemId, 10);
 
         assertThat(lineItem.quantity()).isEqualTo(10);
     }
@@ -49,14 +50,15 @@ class ChangeCartItemQuantityServiceTest {
     @Test
     @DisplayName("changeQuantity - with incorrect item ID")
     void changeQuantityWithIncorrectID() {
+        String userId = "USER_ID";
         Cart cart = Fixtures.cart(List.of(Fixtures.product()));
 
         LineItemId lineItemId = new LineItemId("test-id");
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> {
-            changeCartItemQuantityService.changeQuantity(lineItemId, 10);
+            changeCartItemQuantityService.changeQuantity(userId, lineItemId, 10);
         });
     }
 }

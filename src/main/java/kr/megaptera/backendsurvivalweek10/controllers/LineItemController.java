@@ -9,8 +9,10 @@ import kr.megaptera.backendsurvivalweek10.dtos.ChangeCartLineItemDto;
 import kr.megaptera.backendsurvivalweek10.models.LineItemId;
 import kr.megaptera.backendsurvivalweek10.models.ProductId;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.NoSuchElementException;
 
 @RestController
@@ -21,37 +23,50 @@ public class LineItemController {
     private final ChangeCartItemQuantityService changeCartItemQuantityService;
 
     public LineItemController(
-        GetCartService getCartService,
-        AddProductToCartService addProductToCartService,
-        ChangeCartItemQuantityService changeCartItemQuantityService) {
+            GetCartService getCartService,
+            AddProductToCartService addProductToCartService,
+            ChangeCartItemQuantityService changeCartItemQuantityService) {
         this.getCartService = getCartService;
         this.addProductToCartService = addProductToCartService;
         this.changeCartItemQuantityService = changeCartItemQuantityService;
     }
 
     @GetMapping
-    public CartDto list() {
-        return getCartService.getCartDto();
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
+    public CartDto list(Principal principal) {
+        String userId = principal.getName();
+
+        return getCartService.getCartDto(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void create(@RequestBody AddCartLineItemDto dto) {
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
+    public void create(
+            Principal principal,
+            @RequestBody AddCartLineItemDto dto
+    ) {
+        String userId = principal.getName();
+
         ProductId productId = new ProductId(dto.productId());
         int quantity = dto.quantity();
 
-        addProductToCartService.addProduct(productId, quantity);
+        addProductToCartService.addProduct(userId, productId, quantity);
     }
 
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
     public void update(
-        @PathVariable("id") String id,
-        @RequestBody ChangeCartLineItemDto dto) {
+            Principal principal,
+            @PathVariable("id") String id,
+            @RequestBody ChangeCartLineItemDto dto) {
+        String userId = principal.getName();
+
         LineItemId lineItemId = new LineItemId(id);
         int quantity = dto.quantity();
 
-        changeCartItemQuantityService.changeQuantity(lineItemId, quantity);
+        changeCartItemQuantityService.changeQuantity(userId, lineItemId, quantity);
     }
 
     @ExceptionHandler(NoSuchElementException.class)

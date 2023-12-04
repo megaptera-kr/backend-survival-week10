@@ -4,10 +4,11 @@ import io.hypersistence.tsid.TSID;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @MappedSuperclass
-public abstract class EntityId {
+public abstract class EntityId implements Serializable {
     @Column(name = "id")
     private String value;
 

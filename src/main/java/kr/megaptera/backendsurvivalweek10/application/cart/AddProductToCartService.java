@@ -1,9 +1,6 @@
 package kr.megaptera.backendsurvivalweek10.application.cart;
 
-import kr.megaptera.backendsurvivalweek10.models.Cart;
-import kr.megaptera.backendsurvivalweek10.models.CartId;
-import kr.megaptera.backendsurvivalweek10.models.Product;
-import kr.megaptera.backendsurvivalweek10.models.ProductId;
+import kr.megaptera.backendsurvivalweek10.models.*;
 import kr.megaptera.backendsurvivalweek10.repositories.CartRepository;
 import kr.megaptera.backendsurvivalweek10.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -21,12 +18,12 @@ public class AddProductToCartService {
         this.productRepository = productRepository;
     }
 
-    public Cart addProduct(ProductId productId, int quantity) {
+    public Cart addProduct(String userId, ProductId productId, int quantity) {
         Product product = productRepository.findById(productId)
                 .orElseThrow();
 
-        Cart cart = cartRepository.findById(CartId.DEFAULT)
-                .orElse(new Cart(CartId.DEFAULT));
+        Cart cart = cartRepository.findByUserId(UserId.of(userId))
+                .orElse(new Cart(CartId.generate(), UserId.of(userId)));
 
         cart.addProduct(product, quantity);
 
