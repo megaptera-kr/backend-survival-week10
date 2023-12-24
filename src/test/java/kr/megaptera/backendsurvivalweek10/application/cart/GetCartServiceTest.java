@@ -12,6 +12,7 @@ class GetCartServiceTest {
     private CartDtoFetcher cartDtoFetcher;
 
     private GetCartService getCartService;
+    private final String USER_ID = "USER_ID";
 
     @BeforeEach
     void setUp() {
@@ -22,7 +23,7 @@ class GetCartServiceTest {
 
     @Test
     void getCartDto() {
-        getCartService.getCartDto();
+        getCartService.getCartDto(USER_ID);
 
         verify(cartDtoFetcher).fetchCartDto(any());
     }

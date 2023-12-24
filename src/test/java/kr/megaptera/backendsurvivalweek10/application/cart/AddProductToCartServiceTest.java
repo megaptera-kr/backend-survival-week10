@@ -24,6 +24,7 @@ class AddProductToCartServiceTest {
     private ProductRepository productRepository;
 
     private AddProductToCartService addProductToCartService;
+    private final String USER_ID = "USER_ID";
 
     @BeforeEach
     void setUp() {
@@ -44,7 +45,7 @@ class AddProductToCartServiceTest {
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        Cart cart = addProductToCartService.addProduct(productId, 1);
+        Cart cart = addProductToCartService.addProduct(productId, 1, USER_ID);
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
 
@@ -59,11 +60,11 @@ class AddProductToCartServiceTest {
         Product product = Fixtures.product();
         ProductId productId = product.id();
 
-        given(cartRepository.findById(any())).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserId(any())).willReturn(Optional.of(cart));
         given(productRepository.findById(productId))
                 .willReturn(Optional.of(product));
 
-        addProductToCartService.addProduct(productId, 1);
+        addProductToCartService.addProduct(productId, 1, USER_ID);
 
         assertThat(cart.lineItemsSize()).isEqualTo(1);
     }
@@ -77,7 +78,7 @@ class AddProductToCartServiceTest {
                 .willReturn(Optional.empty());
 
         assertThatThrownBy(() -> {
-            addProductToCartService.addProduct(productId, 1);
+            addProductToCartService.addProduct(productId, 1, USER_ID);
         });
     }
 }

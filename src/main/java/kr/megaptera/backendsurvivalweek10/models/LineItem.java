@@ -1,6 +1,11 @@
 package kr.megaptera.backendsurvivalweek10.models;
 
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -79,5 +84,18 @@ public class LineItem {
     private void setQuantity(int quantity) {
         this.quantity = quantity;
         this.totalPrice = unitPrice.times(quantity);
+    }
+
+    @Override
+    public String toString() {
+        return "LineItem{" +
+                "id=" + id +
+                ", productId=" + productId +
+                ", unitPrice=" + unitPrice +
+                ", quantity=" + quantity +
+                ", totalPrice=" + totalPrice +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
