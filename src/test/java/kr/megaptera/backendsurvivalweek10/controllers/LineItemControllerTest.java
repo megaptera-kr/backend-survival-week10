@@ -16,17 +16,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(LineItemController.class)
 @ActiveProfiles("test")
-class LineItemControllerTest {
+class LineItemControllerTest extends ControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -40,12 +40,24 @@ class LineItemControllerTest {
     private ChangeCartItemQuantityService changeCartItemQuantityService;
 
     @Test
-    @DisplayName("GET /cart-line-items")
-    void list() throws Exception {
-        given(getCartService.getCartDto()).willReturn(new CartDto(List.of()));
+    @DisplayName("GET /cart-line-items- success with login")
+    void listWithLogin() throws Exception {
+        given(getCartService.getCartDto(USER_ID)).willReturn(new CartDto(List.of()));
+
+        mockMvc.perform(get("/cart-line-items")
+                        .header("Authorization", "Bearer " + userAccessToken))
+                .andExpect(status().isOk());
+
+
+    }
+
+    @Test
+    @DisplayName("GET /cart-line-items- fail without login")
+    void listWithoutLogin() throws Exception {
+        given(getCartService.getCartDto(USER_ID)).willReturn(new CartDto(List.of()));
 
         mockMvc.perform(get("/cart-line-items"))
-            .andExpect(status().isOk());
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -54,21 +66,21 @@ class LineItemControllerTest {
         ProductId productId = new ProductId("test-id");
 
         String json = String.format(
-            """
-                {
-                    "productId": "%s",
-                    "quantity": 3
-                }
-                """,
-            productId
+                """
+                        {
+                            "productId": "%s",
+                            "quantity": 3
+                        }
+                        """,
+                productId
         );
 
         mockMvc.perform(post("/cart-line-items")
+                .header("Authorization", "Bearer " + userAccessToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+                .content(json)).andExpect(status().isCreated());
 
-        verify(addProductToCartService).addProduct(productId, 3);
+        verify(addProductToCartService).addProduct(productId, 3, USER_ID);
     }
 
     @Test
@@ -79,27 +91,25 @@ class LineItemControllerTest {
         String json = "{\"quantity\": 3}";
 
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNoContent());
+                        .header("Authorization", "Bearer " + userAccessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isNoContent());
 
-        verify(changeCartItemQuantityService).changeQuantity(lineItemId, 3);
+        verify(changeCartItemQuantityService).changeQuantity(lineItemId, 3, USER_ID);
     }
 
     @Test
-    @DisplayName("PATCH /cart-line-items/{id} - with incorrect ID")
+    @DisplayName("PATCH /cart-line-items/{id} - with incorrect id token pair")
     void updateWithIncorrectID() throws Exception {
         LineItemId lineItemId = new LineItemId("BAD");
 
         String json = "{\"quantity\": 3}";
 
-        doThrow(new NoSuchElementException())
-            .when(changeCartItemQuantityService)
-            .changeQuantity(lineItemId, 3);
-
         mockMvc.perform(patch("/cart-line-items/" + lineItemId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isNotFound());
+                        .header("Authorization", "Bearer " + "XXX")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
     }
 }
